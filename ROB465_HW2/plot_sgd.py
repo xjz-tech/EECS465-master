@@ -11,8 +11,8 @@ for xi in x:
 
 print('*' * 50)
 plt.figure(figsize=(12, 10))
-plt.plot(np.arange(0, len(x)), y, label='fsum', color='black')
-plt.xlabel('x')
+plt.plot(np.arange(0, len(x)), y, label='fsum', color='black', marker = 'o', markevery = 10 )
+plt.xlabel('iteration')
 plt.ylabel('f(x)')
 plt.title('stochastic_gradient_descent')
 plt.grid()
