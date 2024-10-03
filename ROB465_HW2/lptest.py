@@ -13,5 +13,5 @@ objective = cp.Minimize(obj_coef.T @ x)
 constraints = [A @ x <= b]
 problem = cp.Problem(objective, constraints)
 problem.solve()
-print("The optimal point is: x1 = {:.6f}, x2 = {:.6f}".format(x.value[0], x.value[1]))
+print("The optimal point is: x1 = {:.2f}, x2 = {:.2f}".format(x.value[0], x.value[1]))
 
