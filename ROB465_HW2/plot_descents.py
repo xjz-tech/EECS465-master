@@ -29,8 +29,9 @@ plt.scatter(point_gd, fgd_sequence, color='red', label='Gradient Descent', s = 3
 plt.scatter(point_nt, fnt_sequence, color='magenta', label='Newton\'s Method', s = 30)
 plt.xlabel('x')
 plt.ylabel('f(x)')
-plt.savefig('Optimization Results.png')
+
 plt.title('Objective Function and Optimization Results')
+plt.savefig('Optimization Results.png')
 plt.legend()
 
 plt.figure(figsize=(12, 10))
@@ -39,8 +40,9 @@ plt.plot(np.arange(0, point_gd.shape[0]), fgd_sequence, 'red', label='Gradient D
 plt.legend()
 plt.plot(np.arange(0, point_nt.shape[0]), fnt_sequence, 'magenta', label='Newton\'s Method')
 plt.title('Comparation between Newtons Method and Gradient Descent')
-plt.savefig('Comparation between Newtons Method and Gradient Descent.png')
+
 plt.xlabel('iterations')
 plt.ylabel('f(x)')
+plt.savefig('Comparation between Newtons Method and Gradient Descent.png')
 plt.legend()
 plt.show()
