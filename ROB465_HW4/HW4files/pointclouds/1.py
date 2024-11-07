@@ -1,10 +1,23 @@
 #!/usr/bin/env python
 import utils
 import numpy as np
+import time
+import random
 import matplotlib.pyplot as plt
-###YOUR IMPORTS HERE###
+from mpl_toolkits.mplot3d import Axes3D
 
-###YOUR IMPORTS HERE###
+### YOUR IMPORTS HERE ###
+
+### YOUR IMPORTS HERE ###
+
+
+def add_some_outliers(pc, num_outliers):
+    pc = utils.add_outliers_centroid(pc, num_outliers, 0.75, 'uniform')
+    random.shuffle(pc)
+    return pc
+
+
+
 def icp(source, target, max_iterations=100, tolerance=1e-5):
     """
     Perform Iterative Closest Point algorithm to align source to target.
@@ -82,12 +95,12 @@ def icp(source, target, max_iterations=100, tolerance=1e-5):
 
     return transformed_source, R, t, errors
 
-def main():
-    #Import the cloud
-    pc_source = utils.load_pc('cloud_icp_source.csv')
 
-    ###YOUR CODE HERE###
-    pc_target = utils.load_pc('cloud_icp_target3.csv')  # Change this to load a different target
+
+def main():
+    # Import the source and target point clouds
+    pc_source = utils.load_pc('cloud_icp_source.csv')
+    pc_target = utils.load_pc('cloud_icp_target2.csv')  # Change this to load a different target
 
     print("Source Point Cloud:")
     print(pc_source)
@@ -115,7 +128,7 @@ def main():
 
     # Plot Error vs. Iteration
     plt.figure()
-    plt.plot(range(1, len(errors) + 1), errors, marker='o')
+    plt.plot(range(1, len(errors)+1), errors, marker='o')
     plt.xlabel('Iteration')
     plt.ylabel('Mean Error')
     plt.title('ICP Error vs. Iteration')
@@ -132,10 +145,10 @@ def main():
     plt.title('Final Alignment after ICP')
     plt.legend(['Target', 'Transformed Source'])
     plt.savefig('icp_final_alignment.png')  # Save the final alignment plot
-    ###YOUR CODE HERE###
-
     plt.show()
-    #raw_input("Press enter to end:")
+    ### YOUR CODE HERE ###
+
+    input("Press enter to end:")
 
 
 if __name__ == '__main__':

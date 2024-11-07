@@ -1,6 +1,7 @@
+#!/usr/bin/env python
 import numpy as np
-from pybullet_tools.utils import connect, disconnect, set_joint_positions, wait_if_gui, set_point, load_model,\
-                                 joint_from_name, link_from_name, get_joint_info, HideOutput, get_com_pose, wait_for_duration
+from pybullet_tools.utils import connect, disconnect, set_joint_positions, wait_if_gui, set_point, load_model, \
+    joint_from_name, link_from_name, get_joint_info, HideOutput, get_com_pose, wait_for_duration
 from pybullet_tools.transformations import quaternion_matrix
 from pybullet_tools.pr2_utils import DRAKE_PR2_URDF
 import time
@@ -11,8 +12,9 @@ import sys
 
 from utils import draw_sphere_marker
 
+
 def get_ee_transform(robot, joint_indices, joint_vals=None):
-    # returns end-effector transform in the world frame with input joint configuration or with current configuration if not specified
+    # Returns end-effector transform in the world frame with input joint configuration or with current configuration if not specified
     if joint_vals is not None:
         set_joint_positions(robot, joint_indices, joint_vals)
     ee_link = 'l_gripper_tool_frame'
@@ -21,14 +23,15 @@ def get_ee_transform(robot, joint_indices, joint_vals=None):
     res[:3, 3] = pos
     return res
 
+
 def get_joint_axis(robot, joint_idx):
-    # returns joint axis in the world frame
+    # Returns joint axis in the world frame
     j_info = get_joint_info(robot, joint_idx)
     jt_local_pos, jt_local_orn = j_info.parentFramePos, j_info.parentFrameOrn
-    H_L_J = quaternion_matrix(jt_local_orn) # joint transform in parent link CoM frame
+    H_L_J = quaternion_matrix(jt_local_orn)  # Joint transform in parent link CoM frame
     H_L_J[:3, 3] = jt_local_pos
     parent_link_world_pos, parent_link_world_orn = get_com_pose(robot, j_info.parentIndex)
-    H_W_L = quaternion_matrix(parent_link_world_orn) # parent link CoM transform in world frame
+    H_W_L = quaternion_matrix(parent_link_world_orn)  # Parent link CoM transform in world frame
     H_W_L[:3, 3] = parent_link_world_pos
     H_W_J = np.dot(H_W_L, H_L_J)
     R_W_J = H_W_J[:3, :3]
@@ -36,23 +39,26 @@ def get_joint_axis(robot, joint_idx):
     joint_axis_world = np.dot(R_W_J, joint_axis_local)
     return joint_axis_world
 
+
 def get_joint_position(robot, joint_idx):
-    # returns joint position in the world frame
+    # Returns joint position in the world frame
     j_info = get_joint_info(robot, joint_idx)
     jt_local_pos, jt_local_orn = j_info.parentFramePos, j_info.parentFrameOrn
-    H_L_J = quaternion_matrix(jt_local_orn) # joint transform in parent link CoM frame
+    H_L_J = quaternion_matrix(jt_local_orn)  # Joint transform in parent link CoM frame
     H_L_J[:3, 3] = jt_local_pos
     parent_link_world_pos, parent_link_world_orn = get_com_pose(robot, j_info.parentIndex)
-    H_W_L = quaternion_matrix(parent_link_world_orn) # parent link CoM transform in world frame
+    H_W_L = quaternion_matrix(parent_link_world_orn)  # Parent link CoM transform in world frame
     H_W_L[:3, 3] = parent_link_world_pos
     H_W_J = np.dot(H_W_L, H_L_J)
     j_world_posi = H_W_J[:3, 3]
     return j_world_posi
 
+
 def set_joint_positions_np(robot, joints, q_arr):
-    # set active DOF values from a numpy array
+    # Set active DOF values from a numpy array
     q = [q_arr[0, i] for i in range(q_arr.shape[1])]
     set_joint_positions(robot, joints, q)
+
 
 def get_translation_jacobian(robot, joint_indices):
     J = np.zeros((3, len(joint_indices)))
@@ -62,16 +68,12 @@ def get_translation_jacobian(robot, joint_indices):
     for i, joint_index in enumerate(joint_indices):
         joint_axis = get_joint_axis(robot, joint_index)  # Get the rotation axis direction of the joint (z_i)
         joint_pos = get_joint_position(robot, joint_index)  # Get the position of the joint (p_i)
-        # print(joint_pos)
-        # # Translational part of the Jacobian (linear velocity)
-        # here we only care about position
+        # Translational part of the Jacobian (linear velocity)
         J[:3, i] = np.cross(joint_axis, (ee_pos - joint_pos))  # Compute z_i × (p_ee - p_i)
-
-        # # Rotational part of the Jacobian (angular velocity)
-        # J[3:, i] = joint_axis  # For revolute joints, the rotation axis contributes directly
 
     ### YOUR CODE HERE ###
     return J
+
 
 def get_jacobian_pinv(J):
     J_pinv = []
@@ -88,11 +90,14 @@ def get_jacobian_pinv(J):
     ### YOUR CODE HERE ###
     return J_pinv
 
+
 def tuck_arm(robot):
-    joint_names = ['torso_lift_joint','l_shoulder_lift_joint','l_elbow_flex_joint',\
-        'l_wrist_flex_joint','r_shoulder_lift_joint','r_elbow_flex_joint','r_wrist_flex_joint']
+    joint_names = ['torso_lift_joint', 'l_shoulder_lift_joint', 'l_elbow_flex_joint', \
+                   'l_wrist_flex_joint', 'r_shoulder_lift_joint', 'r_elbow_flex_joint', 'r_wrist_flex_joint']
     joint_idx = [joint_from_name(robot, jn) for jn in joint_names]
-    set_joint_positions(robot, joint_idx, (0.24,1.29023451,-2.32099996,-0.69800004,1.27843491,-2.32100002,-0.69799996))
+    set_joint_positions(robot, joint_idx,
+                        (0.24, 1.29023451, -2.32099996, -0.69800004, 1.27843491, -2.32100002, -0.69799996))
+
 
 def main():
     args = sys.argv[1:]
@@ -107,33 +112,35 @@ def main():
         print("ERROR: Test index has not been specified")
         exit()
 
-    # initialize PyBullet
+    # Initialize PyBullet
     connect(use_gui=True, shadows=False)
-    # load robot
+    # Load robot
     with HideOutput():
         robot = load_model(DRAKE_PR2_URDF, fixed_base=True)
         set_point(robot, (-0.75, -0.07551, 0.02))
     tuck_arm(robot)
-    # define active DoFs
-    joint_names =['l_shoulder_pan_joint','l_shoulder_lift_joint','l_upper_arm_roll_joint', \
-        'l_elbow_flex_joint','l_forearm_roll_joint','l_wrist_flex_joint','l_wrist_roll_joint']
+    # Define active DoFs
+    joint_names = ['l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', \
+                   'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint']
     joint_idx = [joint_from_name(robot, jn) for jn in joint_names]
-    # intial config
+    # Initial config
     q_arr = np.zeros((1, len(joint_idx)))
     set_joint_positions_np(robot, joint_idx, q_arr)
-    # list of example targets
-    targets = [[-0.15070158,  0.47726995, 1.56714123],
-               [-0.36535318,  0.11249,    1.08326675],
-               [-0.56491217,  0.011443,   1.2922572 ],
-               [-1.07012697,  0.81909669, 0.47344636],
-               [-1.11050811,  0.97000718,  1.31087581]]
-    # define joint limits
-    joint_limits = {joint_names[i] : (get_joint_info(robot, joint_idx[i]).jointLowerLimit, get_joint_info(robot, joint_idx[i]).jointUpperLimit) for i in range(len(joint_idx))}
-    q = np.zeros((1, len(joint_names))) # start at this configuration
+    # List of example targets
+    targets = [[-0.15070158, 0.47726995, 1.56714123],
+               [-0.36535318, 0.11249, 1.08326675],
+               [-0.56491217, 0.011443, 1.2922572],
+               [-1.07012697, 0.81909669, 0.47344636],
+               [-1.11050811, 0.97000718, 1.31087581]]
+    # Define joint limits
+    joint_limits = {joint_names[i]: (
+    get_joint_info(robot, joint_idx[i]).jointLowerLimit, get_joint_info(robot, joint_idx[i]).jointUpperLimit) for i in
+                    range(len(joint_idx))}
+    q = np.zeros((1, len(joint_names)))  # Start at this configuration
     target = targets[test_idx]
-    # draw a blue sphere at the target
+    # Draw a blue sphere at the target
     draw_sphere_marker(target, 0.05, (0, 0, 1, 1))
-    
+
     ### YOUR CODE HERE ###
     x_current = get_ee_transform(robot, joint_idx)[:3, 3]  # Current end-effector position
     error = np.linalg.norm(target - x_current)  # Compute initial error
@@ -150,8 +157,25 @@ def main():
         # Compute the error vector (desired velocity direction)
         x_dot = target - x_current
 
-        # Update joint velocities using the pseudo-inverse
-        q_dot = np.dot(J_inv, x_dot)
+        # Primary task: Solve for joint velocities using the pseudo-inverse
+        q_dot_primary = np.dot(J_inv, x_dot)
+
+        # Secondary task: Repel configuration away from joint limits
+        q_dot_secondary = np.zeros_like(q[0])
+        for i, joint_name in enumerate(joint_names):
+            lower_limit, upper_limit = joint_limits[joint_name]
+            mid_point = (lower_limit + upper_limit) / 2  # Mid-point of the joint range
+            # Repel the joint away from limits, proportional to the distance from mid-point
+            q_dot_secondary[i] = -(q[0, i] - mid_point)
+
+        # Project the secondary task into the null-space of the primary task
+        null_space_projection = np.eye(len(joint_idx)) - np.dot(J_inv, J)
+        # print("null space projection", null_space_projection)
+        q_dot_secondary = np.dot(null_space_projection, q_dot_secondary)
+
+        # Combine primary and secondary tasks
+        beta = 0.01  # Tuning parameter for secondary task
+        q_dot = q_dot_primary + beta * q_dot_secondary
 
         # Limit joint velocity magnitudes to avoid large jumps
         if np.linalg.norm(q_dot) > alpha:
@@ -171,19 +195,24 @@ def main():
         x_current = get_ee_transform(robot, joint_idx)[:3, 3]
         error = np.linalg.norm(target - x_current)
 
+        # Add a small delay for simulation
+        wait_for_duration(0.01)
 
     # Save the configuration if the target is successfully reached
     configurations.append(q.copy())
 
-    # Output the configurations for all targets
-    print("Configurations for targets:", configurations)
-    #Configurations for targets: [array([[-0.24104755,  0.31898117,  0.13543999, -2.04895411,  0.        , -1.13402828,  0.        ]])]
+    # ### YOUR CODE HERE ###
+    # Print the end-effector's final position
+    # Print the end-effector's final position
+    print(f"End-effector final position: {x_current}")
 
-
-    ### YOUR CODE HERE ###
+    # Print the joint configuration as an array
+    print("Joint configuration (radians):")
+    print(q[0])
 
     wait_if_gui()
     disconnect()
+
 
 if __name__ == '__main__':
     main()

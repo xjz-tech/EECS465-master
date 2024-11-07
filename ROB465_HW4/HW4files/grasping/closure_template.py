@@ -55,7 +55,30 @@ def calculate_friction_cone(contact_force_vector, tangent_dir, mu, num_cone_vect
     _, contact_unit_normal, f_0_pre_rotation = get_f0_pre_rotation(contact_force_vector, mu)
     ### YOUR CODE HERE ###
 
-    ######################
+    # Compute the angle beta based on the friction coefficient
+    beta = np.arctan(mu)
+
+    # Rotate the contact force vector about the tangent direction by beta to get the initial f_0 vector
+    rotation_about_tangent = Rotation.from_rotvec(beta * tangent_dir)
+    f_0 = rotation_about_tangent.apply(f_0_pre_rotation)
+
+    cone_edges = []  # Start with an empty list for storing cone vectors
+    for i in range(num_cone_vectors):
+        # Evenly spaced rotation around the contact normal
+        angle = 2 * np.pi * i / num_cone_vectors
+        rotation_around_normal = Rotation.from_rotvec(angle * contact_unit_normal)
+        cone_vector = rotation_around_normal.apply(f_0)  # Apply the rotation to f_0
+
+        # Debugging prints
+        # print("contact_unit_normal", contact_unit_normal)
+        # print("angle * contact_unit_normal", angle * contact_unit_normal)
+        # print("f_0", f_0)
+        # print("cone vector", cone_vector)
+
+        cone_edges.append(cone_vector)  # Add the resulting vector to the list
+
+    cone_edges = np.array(cone_edges)  # Convert the list to a numpy array
+
 
     return cone_edges
 
@@ -66,6 +89,7 @@ def compare_discretization(contact_point, world):
     :param world: The world object.
     :return: None
     """
+    # print("*" * 50)
     _, mu, _= world.get_object_info()
     _, contact_force_vector, tangent_dir = process_contact_point(contact_point)
 
@@ -80,6 +104,16 @@ def compare_discretization(contact_point, world):
     eight_vector_volume = None
 
     ### YOUR CODE HERE ###
+    h = np.linalg.norm(contact_force_vector)  # Assume the height of the cone is normalized to 1
+    r = h * mu  # Radius of the base
+    true_volume = (1 / 3) * np.pi * (r ** 2) * h  # Volume of a cone formula
+    origin = np.zeros((1, 3))
+    four_vector_with_origin = np.vstack((four_vector, origin))
+    eight_vector_with_origin = np.vstack((eight_vector, origin))
+    # print("four_vector_with_origin", four_vector_with_origin)
+    # # Compute convex hull volumes
+    four_vector_volume = ConvexHull(four_vector_with_origin).volume
+    eight_vector_volume = ConvexHull(eight_vector_with_origin).volume
 
     ######################
 
@@ -106,14 +140,30 @@ def convex_hull(wrenches):
     max_radius = 0.0
 
     ### YOUR CODE HERE ###
+    try:
+        # Compute the convex hull of the wrenches using the 'QJ' parameter to avoid numerical issues
+        hull = ConvexHull(wrenches, qhull_options='QJ')
 
-    ######################
+        # Check if the origin is inside the convex hull
+        # The convex hull is defined as a set of half-space inequalities Ax + b <= 0, where A and b are given by hull.equations
+        origin = np.zeros(wrenches.shape[1])  # The origin in 6D space
+        # Check if the origin satisfies all the inequalities
+        force_closure_bool = np.all(np.dot(hull.equations[:, :-1], origin) + hull.equations[:, -1] <= 0)
 
+        if force_closure_bool:
+            # Calculate the radius of the largest hypersphere centered at the origin
+            # The radius is the shortest distance from the origin to each hyperplane: -b / ||A||
+            distances = -hull.equations[:, -1] / np.linalg.norm(hull.equations[:, :-1], axis=1)
+            max_radius = np.min(distances)
+    except Exception as e:
+        print(f"Error occurred while computing the convex hull: {e}")
+
+        ### Your code ends here ###
     if hull is None:
-        print('convex_hull not implemented')
+        print('convex_hull function not implemented')
     else:
         if force_closure_bool:
-            print('In force closure. Maximum radius:', np.round(max_radius, 4))
+            print('In force closure. Maximum hypersphere radius:', np.round(max_radius, 4))
         else:
             print('Not in force closure')
 
@@ -140,6 +190,7 @@ def main():
         contact_points = world.grasp([.0, .02, .01, 0])
         print('\n========================================\n')
         input(f'Grasp 2 complete. Press <ENTER> to compute force closure.\n')
+
     
     if args.custom:
         x, y, z, theta = args.custom
