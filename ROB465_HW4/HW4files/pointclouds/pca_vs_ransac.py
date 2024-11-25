@@ -46,7 +46,7 @@ def compute_ransac_plane(pc):
         raise ValueError(f"Unexpected data shape in RANSAC: {data.shape}")
 
     max_iterations = 1000
-    distance_threshold = 0.01
+    distance_threshold = 0.05
     num_points = data.shape[0]
     best_inliers = []
     best_plane = None
@@ -139,8 +139,9 @@ def main():
             data = data.squeeze(axis=1)
         distances_pca = np.abs(np.dot(data, pca_normal) + pca_d)
         # Determine inliers
-        distance_threshold = 0.01
+        distance_threshold = 0.05
         pca_inlier_indices = np.where(distances_pca < distance_threshold)[0]
+        # print(distances_pca[np.where(distances_pca < distance_threshold)[0]])
         pca_error = np.sum(distances_pca[pca_inlier_indices] ** 2)
         pca_errors.append(pca_error)
         pca_times.append(pca_time)

@@ -22,6 +22,14 @@ def icp(source, target, max_iterations=100, tolerance=1e-5):
         errors (list): List of errors at each iteration.
     """
     # Initialize transformation
+    # theta = np.radians(90)
+    #
+    # # 绕 X 轴旋转
+    # R = np.array([
+    #     [1, 0, 0],
+    #     [0, np.cos(theta), -np.sin(theta)],
+    #     [0, np.sin(theta), np.cos(theta)]
+    # ])
     R = np.eye(3)
     t = np.zeros((3, 1))
     transformed_source = source.copy()
@@ -87,7 +95,7 @@ def main():
     pc_source = utils.load_pc('cloud_icp_source.csv')
 
     ###YOUR CODE HERE###
-    pc_target = utils.load_pc('cloud_icp_target3.csv')  # Change this to load a different target
+    pc_target = utils.load_pc('cloud_icp_target2.csv')  # Change this to load a different target
 
     print("Source Point Cloud:")
     print(pc_source)

@@ -8,10 +8,16 @@ from mpl_toolkits.mplot3d import Axes3D  # Import 3D plotting tools explicitly
 
 ###YOUR IMPORTS HERE###
 
-
 def main():
 
-    #Import the cloud
+    print("\nYOU NEED TO ROTATE THE PICTURE TO SEE THE TITLE AND GREEN PLANE OF THE PICTURE!!!!!!!!!!!!!!")
+    print("YOU NEED TO ROTATE THE PICTURE TO SEE THE TITLE AND GREEN PLANE OF THE PICTURE!!!!!!!!!!!!!!")
+    print("YOU NEED TO ROTATE THE PICTURE TO SEE THE TITLE AND GREEN PLANE OF THE PICTURE!!!!!!!!!!!!!!")
+    print("YOU NEED TO ROTATE THE PICTURE TO SEE THE TITLE AND GREEN PLANE OF THE PICTURE!!!!!!!!!!!!!!\n")
+
+    # plt.rcParams['figure.figsize'] = [, 12]  # Width: 12 inches, Height: 8 inches
+
+    # Import the cloud
     pc = utils.load_pc('cloud_pca.csv')
 
     ###YOUR CODE HERE###
@@ -37,15 +43,15 @@ def main():
     # Rotate the point cloud (apply rotation matrix)
     pc_rotated = (pc_flattened @ eigenvectors).reshape(pc.shape)
 
-    #Show the resulting point cloud
+    # Show the resulting point cloud
     fig = utils.view_pc([pc_rotated])  # Shape: (200, 3, 1)
     ax = fig.axes[0]
-    ax.view_init(elev=90, azim=-90)  # Align with XY plane
+    ax.view_init(elev=45, azim=-45)  # Align with XY plane
     plt.title("Part a: Rotated Point Cloud")
     print("Part a) V^T matrix applied:")
     print(eigenvectors.T)
+    plt.tight_layout()  # Adjust layout to make room for the title
     plt.show()  # Display the plot and wait until it's closed
-
 
     # Part b: Rotate the points and eliminate noise
     n_components = 2  # Keep the first two principal components
@@ -62,10 +68,8 @@ def main():
 
     pc_denoised[:, 2, :] = 0  # Explicitly set z values to 0
 
-
-
     # Show the resulting point cloud
-    fig = plt.figure()
+    fig = plt.figure(figsize=(12, 8))  # Explicitly set figure size
     ax = fig.add_subplot(111, projection='3d')
 
     # Add axis labels
@@ -74,10 +78,10 @@ def main():
     ax.set_zlabel('Z')
 
     ax.scatter(pc_denoised[:, 0, 0], pc_denoised[:, 1, 0], pc_denoised[:, 2, 0], c='blue', marker='o')
-    ax.view_init(elev=90, azim=-90)  # Set the view from above to show the point cloud flattened on the XY plane
+    ax.view_init(elev=45, azim=-45)  # Set the view from above to show the point cloud flattened on the XY plane
     plt.title("Part b: Denoised 2D Point Cloud (Projected onto XY Plane)")
+    plt.tight_layout()  # Adjust layout
     plt.show()
-
 
     # Part c: Fit a plane to the cloud and draw it
     fig = utils.view_pc([pc])
@@ -103,21 +107,22 @@ def main():
         z_grid = np.full_like(x_grid, z0)
 
     # Plot the plane
-    ax.plot_surface(x_grid, y_grid, z_grid, color='green', alpha=0.5)
+    ax.plot_surface(x_grid, y_grid, z_grid, color='green', alpha=0.7)  # Increased alpha for better visibility
+
+    # Set the title after plotting the plane
     plt.title("Part c: Fitted Plane with Point Cloud")
-    ###YOUR CODE HERE###
 
+    # Adjust view angles to better visualize the plane
+    ax.view_init(elev=20, azim=30)  # Adjust as needed
 
-
-
-
-
-
-
+    plt.tight_layout()  # Adjust layout to make room for the title
     plt.show()
+
+    print("\nYOU NEED TO ROTATE THE PICTURE TO SEE THE TITLE AND GREEN PLANE OF THE PICTURE!!!!!!!!!!!!!!")
+    print("YOU NEED TO ROTATE THE PICTURE TO SEE THE TITLE AND GREEN PLANE OF THE PICTURE!!!!!!!!!!!!!!")
+    print("YOU NEED TO ROTATE THE PICTURE TO SEE THE TITLE AND GREEN PLANE OF THE PICTURE!!!!!!!!!!!!!!")
+    print("YOU NEED TO ROTATE THE PICTURE TO SEE THE TITLE AND GREEN PLANE OF THE PICTURE!!!!!!!!!!!!!!\n")
     #input("Press enter to end:")
-
-
 
 if __name__ == '__main__':
     main()
